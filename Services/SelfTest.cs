@@ -74,7 +74,14 @@ public static class SelfTest
         Check("Locate returns a candidate", () =>
             !string.IsNullOrWhiteSpace(IpatoolService.BinaryPath));
 
-        if (results.All(r => r.Ok) && results.Count == 10)
+        var errs = IpatoolService.ExtractLastError(IpatoolService.ParseJsonLines(new[]
+        {
+            "{\"level\":\"info\",\"time\":\"t\",\"message\":\"preparing authentication\"}",
+            "{\"level\":\"info\",\"message\":\"2FA code is required; run the command again and supply a code using the --auth-code flag\"}",
+        }));
+        Check("ExtractLastError", () => errs.Contains("2FA code is required"));
+
+        if (results.All(r => r.Ok) && results.Count == 11)
         {
             Console.WriteLine($"SELFTEST OK ({results.Count} checks)");
             return 0;

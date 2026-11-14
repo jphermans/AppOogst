@@ -70,6 +70,19 @@ public sealed class IpatoolService
 
     // ------------------------------ defensive JSON parsing (line by line) ------------------------------
 
+    /// <summary>Extracts the last human-readable error/message line from ipatool JSON output (login failures etc.).</summary>
+    public static string ExtractLastError(List<JsonObject> objs)
+    {
+        string? msg = null;
+        foreach (var o in objs)
+        {
+            var m = o["message"] ?? o["error"];
+            if (m is JsonValue v && v.TryGetValue(out string? sv) && !string.IsNullOrWhiteSpace(sv))
+                msg = sv;
+        }
+        return msg ?? "unknown error";
+    }
+
     public static List<JsonObject> ParseJsonLines(IEnumerable<string> lines)
     {
         var objs = new List<JsonObject>();

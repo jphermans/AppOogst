@@ -133,7 +133,7 @@ public partial class MainViewModel : ViewModelBase
         {
             if (auth is { Success: true } a)
             {
-                AuthDisplay = $"Ingelogd als {a.Name} ({a.Email})";
+                AuthDisplay = $"Signed in as {a.Name} ({a.Email})";
                 SideEmail = a.Email;
                 AuthOk = true;
             }
@@ -174,8 +174,15 @@ public partial class MainViewModel : ViewModelBase
                 await RefreshAuthCoreAsync();
             }
             else
-                Log($"sign-in FAILED (exit {res.ExitCode})");
-            SetStatus($"sign-in finished (exit {res.ExitCode})");
+            {
+                var reason = IpatoolService.ExtractLastError(IpatoolService.ParseJsonLines(res.Lines));
+                if (reason.Contains("2FA code is required", StringComparison.OrdinalIgnoreCase))
+                    reason = "2FA code is required — enter your 6-digit code from a trusted device and sign in again";
+                Log($"sign-in FAILED (exit {res.ExitCode}): {reason}");
+                SetStatus($"sign-in failed: {reason}");
+                return;
+            }
+            SetStatus("sign-in finished successfully");
         }, "signing in ...");
     }
 

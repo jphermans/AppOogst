@@ -71,7 +71,7 @@
                            TextWrapping="Wrap" />
                 <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
                   <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshAuthCommand}" />
-                  <Button Classes="danger" Content="Sign out" Command="{Binding RevokeCommand}" />
+                  <Button Classes="danger" Content="Sign out" Command="{Binding RevokeCommand}" IsVisible="{Binding AuthOk}" />
                 </StackPanel>
               </StackPanel>
             </Border>
@@ -81,7 +81,7 @@
                 <TextBox Watermark="email address" Text="{Binding LoginEmail, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
                 <TextBox Watermark="password" PasswordChar="•" Width="380" HorizontalAlignment="Left"
                          Text="{Binding LoginPassword, Mode=TwoWay}" />
-                <TextBox Watermark="2FA code (optional)" Text="{Binding Login2fa, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
+                <TextBox Watermark="2FA code — required for accounts with two-factor auth" Text="{Binding Login2fa, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
                 <Button Classes="accent" Content="Sign in" Command="{Binding LoginCommand}" HorizontalAlignment="Left" Margin="0,4,0,0" />
               </StackPanel>
             </Border>
