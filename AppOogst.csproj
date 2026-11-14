@@ -5,7 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <Version>0.1.1</Version>
-    <Authors>Jean-Pierre Hermans</Authors>
+    <Authors>JPHsystems — Jean-Pierre Hermans</Authors>
+    <Company>JPHsystems</Company>
     <Product>AppOogst</Product>
     <Description>Harvest your own purchased App Store apps as .ipa files via ipatool, wrapped in a modern Avalonia UI.</Description>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
