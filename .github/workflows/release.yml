@@ -42,11 +42,21 @@ jobs:
         run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 
       - name: Bundle ipatool binary
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          url=$(curl -s https://api.github.com/repos/majd/ipatool/releases/latest \
-            | jq -r '.assets[] | select(.name | test("${{ matrix.ipa_regex }}")) | .browser_download_url' \
-            | head -n1)
+          url=""
+          for attempt in 1 2 3 4 5; do
+            json=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
+              https://api.github.com/repos/majd/ipatool/releases/latest || true)
+            url=$(printf '%s' "$json" \
+              | jq -r '.assets[]? | select(.name | test("${{ matrix.ipa_regex }}")) | .browser_download_url' \
+              | head -n1 || true)
+            [ -n "$url" ] && break
+            echo "Attempt $attempt: no matching asset (rate limit / transient API failure); retrying..."
+            sleep $((attempt * 10))
+          done
           if [ -z "$url" ]; then
             echo "No matching ipatool asset for ${{ matrix.rid }}"; exit 1
           fi
