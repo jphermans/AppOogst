@@ -8,11 +8,18 @@
         Icon="avares://AppOogst/Assets/appoogst.ico"
         Width="1180" Height="760"
         Background="{DynamicResource AppBgBrush}">
+  <!-- The macOS APP menu (About AppOogst) lives at Application level
+       (NativeMenu.SetMenu in the App ctor). This window-level menu only
+       adds the Help menu next to it in the menu bar. -->
   <NativeMenu.Menu>
     <NativeMenu>
-      <NativeMenuItem Header="About AppOogst" Click="AboutMenu_Click" />
-      <NativeMenuItemSeparator />
-      <NativeMenuItem Header="AppOogst Help" Click="HelpMenu_Click" />
+      <NativeMenuItem Header="Help">
+        <NativeMenuItem.Menu>
+          <NativeMenu>
+            <NativeMenuItem Header="AppOogst Help" Click="HelpMenu_Click" />
+          </NativeMenu>
+        </NativeMenuItem.Menu>
+      </NativeMenuItem>
     </NativeMenu>
   </NativeMenu.Menu>
   <Window.Resources>

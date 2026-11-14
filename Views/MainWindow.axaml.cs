@@ -66,7 +66,4 @@ public partial class MainWindow : Window
 
     private void HelpMenu_Click(object? sender, EventArgs e)
         => new HelpWindow(this).Show();
-
-    private void AboutMenu_Click(object? sender, EventArgs e)
-        => new AboutWindow(this).Show();
 }
