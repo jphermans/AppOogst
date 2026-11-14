@@ -4,7 +4,7 @@
     <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.1.1</Version>
+    <Version>0.1.2</Version>
     <Authors>JPHsystems — Jean-Pierre Hermans</Authors>
     <Company>JPHsystems</Company>
     <Product>AppOogst</Product>
