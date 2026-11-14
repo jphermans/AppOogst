@@ -7,3 +7,4 @@ obj/
 publish/
 AppOogst.app/
 *.dmg
+publish-osx/
