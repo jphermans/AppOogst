@@ -38,8 +38,8 @@ jobs:
         with:
           dotnet-version: 11.0.x
 
-      - name: Publish self-contained
-        run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -o publish
+      - name: Publish self-contained single file
+        run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
 
       - name: Bundle ipatool binary
         run: |
@@ -53,11 +53,7 @@ jobs:
           echo "Downloading ipatool: $url"
           curl -sL "$url" -o ipatool-dl
           mkdir -p ipatool-ex
-          case "$url" in
-            *.tar.gz) tar -xzf ipatool-dl -C ipatool-ex ;;
-            *.zip)    unzip -q ipatool-dl -d ipatool-ex ;;
-            *) echo "Unknown archive type: $url"; exit 1 ;;
-          esac
+          tar -xzf ipatool-dl -C ipatool-ex
           bin=$(find ipatool-ex -type f -name 'ipatool*${{ matrix.ipa_ext }}' | head -n1)
           if [ -z "$bin" ]; then
             echo "ipatool binary not found inside archive"; ls -R ipatool-ex; exit 1
@@ -66,16 +62,35 @@ jobs:
           chmod +x "publish/ipatool${{ matrix.ipa_ext }}" 2>/dev/null || true
           echo "Bundled: publish/ipatool${{ matrix.ipa_ext }}"
 
-      - name: Archive
+      - name: Selftest (published binary)
+        run: |
+          if [ "${{ matrix.rid }}" = "win-x64" ]; then BIN=publish/AppOogst.exe; else BIN=publish/AppOogst; fi
+          "$BIN" --selftest
+
+      - name: Package (Linux AppImage)
+        if: matrix.rid == 'linux-x64'
         run: |
           set -euo pipefail
-          name="AppOogst-${GITHUB_REF_NAME}-${{ matrix.rid }}"
-          mv publish "$name"
-          if [ "${{ matrix.rid }}" = "win-x64" ]; then
-            powershell -NoProfile -Command "Compress-Archive -Path '$name' -DestinationPath '$name.zip'"
-          else
-            tar -czf "$name.tar.gz" "$name"
-          fi
+          bash scripts/build-appimage.sh publish "${GITHUB_REF_NAME#v}" "AppOogst-${GITHUB_REF_NAME}-linux-x64.AppImage"
+          ls -lh AppOogst-*
+
+      - name: Package (Windows single-file zip)
+        if: matrix.rid == 'win-x64'
+        run: |
+          set -euo pipefail
+          mkdir -p "AppOogst-${GITHUB_REF_NAME}-win-x64"
+          cp publish/AppOogst.exe "AppOogst-${GITHUB_REF_NAME}-win-x64/AppOogst.exe"
+          cp publish/ipatool.exe "AppOogst-${GITHUB_REF_NAME}-win-x64/ipatool.exe"
+          powershell -NoProfile -Command "Compress-Archive -Path 'AppOogst-${GITHUB_REF_NAME}-win-x64' -DestinationPath 'AppOogst-${GITHUB_REF_NAME}-win-x64.zip'"
+          ls -lh AppOogst-*
+
+      - name: Package (macOS app bundle + dmg)
+        if: matrix.rid == 'osx-arm64'
+        run: |
+          set -euo pipefail
+          VER="${GITHUB_REF_NAME#v}"
+          bash scripts/build-macos-app.sh publish "$VER" "AppOogst-${GITHUB_REF_NAME}-osx-arm64.dmg"
+          codesign --verify --deep AppOogst.app
           ls -lh AppOogst-*
 
       - name: Attach release assets

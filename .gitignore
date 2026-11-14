@@ -5,3 +5,5 @@ obj/
 .vs/
 .DS_Store
 publish/
+AppOogst.app/
+*.dmg

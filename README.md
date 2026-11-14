@@ -21,9 +21,9 @@ Grab a ready-to-run build from the [Releases](https://github.com/jphermans/AppOo
 
 | Package | Contents |
 |---|---|
-| `AppOogst-vX.Y.Z-win-x64.zip` | `AppOogst.exe` + bundled `ipatool.exe` — **no .NET or ipatool install needed** |
-| `AppOogst-vX.Y.Z-linux-x64.tar.gz` | `AppOogst` + bundled `ipatool` |
-| `AppOogst-vX.Y.Z-osx-arm64.tar.gz` | `AppOogst` + bundled `ipatool` (Apple Silicon) |
+| `AppOogst-vX.Y.Z-win-x64.zip` | **`AppOogst.exe`** (single file) + bundled `ipatool.exe` — no .NET or ipatool install needed |
+| `AppOogst-vX.Y.Z-osx-arm64.dmg` | real **AppOogst.app** (icon, ad-hoc signed) + bundled `ipatool` (Apple Silicon) |
+| `AppOogst-vX.Y.Z-linux-x64.AppImage` | single-file **AppImage** + bundled `ipatool` |
 
 All builds are **self-contained** (the .NET runtime is included) and ship with the official [ipatool](https://github.com/majd/ipatool) binary (MIT). Unzip/untar and run — no separate installation required. A system-installed ipatool is used as a fallback if present.
 

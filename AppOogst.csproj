@@ -4,7 +4,7 @@
     <TargetFramework>net11.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
     <Authors>Jean-Pierre Hermans</Authors>
     <Product>AppOogst</Product>
     <Description>Harvest your own purchased App Store apps as .ipa files via ipatool, wrapped in a modern Avalonia UI.</Description>
