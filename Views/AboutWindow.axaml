@@ -1,15 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="AppOogst.Views.AboutWindow"
+        Icon="avares://AppOogst/Assets/appoogst.ico"
         Title="About AppOogst"
         Width="460" SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
         ShowInTaskbar="False"
-        Background="#14161b">
+        Background="{DynamicResource AppBgBrush}">
   <Panel Margin="28,24">
     <StackPanel Spacing="10">
-      <Image Source="avares://AppOogst/Assets/icon.png" Width="96" Height="96" HorizontalAlignment="Center" />
+      <Image Source="avares://AppOogst/Assets/icon.png" Width="112" Height="112" HorizontalAlignment="Center" />
       <TextBlock Classes="h1" Text="AppOogst" FontSize="26" HorizontalAlignment="Center" />
       <TextBlock x:Name="VersionText" Classes="muted" HorizontalAlignment="Center" />
       <TextBlock Text="by JPHsystems" HorizontalAlignment="Center" Foreground="#5b9dff" FontWeight="SemiBold" Margin="0,0,0,4" />

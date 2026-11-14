@@ -1,3 +1,4 @@
+using Avalonia.Styling;
 using System.Text.Json.Nodes;
 using AppOogst.Models;
 using AppOogst.ViewModels;
@@ -74,6 +75,12 @@ public static class SelfTest
         Check("Locate returns a candidate", () =>
             !string.IsNullOrWhiteSpace(IpatoolService.BinaryPath));
 
+        Check("ThemeManager variants", () =>
+            ThemeManager.ResolveVariant(0) == ThemeVariant.Default
+            && ThemeManager.ResolveVariant(1) == ThemeVariant.Dark
+            && ThemeManager.ResolveVariant(2) == ThemeVariant.Light
+            && ThemeManager.ThemeChoices.SequenceEqual(new[] { "System", "Dark", "Light" }));
+
         var errs = IpatoolService.ExtractLastError(IpatoolService.ParseJsonLines(new[]
         {
             "{\"level\":\"info\",\"time\":\"t\",\"message\":\"preparing authentication\"}",
@@ -81,7 +88,7 @@ public static class SelfTest
         }));
         Check("ExtractLastError", () => errs.Contains("2FA code is required"));
 
-        if (results.All(r => r.Ok) && results.Count == 11)
+        if (results.All(r => r.Ok) && results.Count == 12)
         {
             Console.WriteLine($"SELFTEST OK ({results.Count} checks)");
             return 0;

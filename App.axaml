@@ -1,9 +1,35 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="AppOogst.App"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="Default">
   <Application.Resources>
     <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="AppBgBrush" Color="#14161b" />
+          <SolidColorBrush x:Key="SideBrush" Color="#1b1f27" />
+          <SolidColorBrush x:Key="CardBrush" Color="#1e222b" />
+          <SolidColorBrush x:Key="LineBrush" Color="#2a2f3a" />
+          <SolidColorBrush x:Key="TextPrimaryBrush" Color="#eef1f7" />
+          <SolidColorBrush x:Key="TextSecondaryBrush" Color="#c7ccd8" />
+          <SolidColorBrush x:Key="TextMutedBrush" Color="#98a0b0" />
+          <SolidColorBrush x:Key="GhostBrush" Color="#2a2f3a" />
+          <SolidColorBrush x:Key="GhostHoverBrush" Color="#363c49" />
+          <SolidColorBrush x:Key="GhostTextBrush" Color="#d7dce6" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="AppBgBrush" Color="#f7f8fa" />
+          <SolidColorBrush x:Key="SideBrush" Color="#eef0f4" />
+          <SolidColorBrush x:Key="CardBrush" Color="#ffffff" />
+          <SolidColorBrush x:Key="LineBrush" Color="#d5dae3" />
+          <SolidColorBrush x:Key="TextPrimaryBrush" Color="#171a20" />
+          <SolidColorBrush x:Key="TextSecondaryBrush" Color="#3a3f4a" />
+          <SolidColorBrush x:Key="TextMutedBrush" Color="#5f6672" />
+          <SolidColorBrush x:Key="GhostBrush" Color="#e3e7ee" />
+          <SolidColorBrush x:Key="GhostHoverBrush" Color="#d5dbe6" />
+          <SolidColorBrush x:Key="GhostTextBrush" Color="#2b303a" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
       <ResourceDictionary.MergedDictionaries>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
@@ -12,8 +38,8 @@
   </Application.Resources>
   <Application.Styles>
     <Style Selector="Border.card">
-      <Setter Property="Background" Value="#1e222b" />
-      <Setter Property="BorderBrush" Value="#2a2f3a" />
+      <Setter Property="Background" Value="{DynamicResource CardBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="CornerRadius" Value="10" />
       <Setter Property="Padding" Value="16" />
@@ -21,15 +47,15 @@
     <Style Selector="TextBlock.h1">
       <Setter Property="FontSize" Value="18" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Foreground" Value="#eef1f7" />
+      <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
     </Style>
     <Style Selector="TextBlock.h2">
       <Setter Property="FontSize" Value="13" />
       <Setter Property="FontWeight" Value="SemiBold" />
-      <Setter Property="Foreground" Value="#98a0b0" />
+      <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
     </Style>
     <Style Selector="TextBlock.muted">
-      <Setter Property="Foreground" Value="#98a0b0" />
+      <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
     </Style>
     <Style Selector="Button.accent">
       <Setter Property="Background" Value="#5b9dff" />
@@ -45,13 +71,13 @@
       <Setter Property="Background" Value="#4c8ae8" />
     </Style>
     <Style Selector="Button.ghost">
-      <Setter Property="Background" Value="#2a2f3a" />
-      <Setter Property="Foreground" Value="#d7dce6" />
+      <Setter Property="Background" Value="{DynamicResource GhostBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource GhostTextBrush}" />
       <Setter Property="Padding" Value="14,8" />
       <Setter Property="CornerRadius" Value="8" />
     </Style>
     <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-      <Setter Property="Background" Value="#363c49" />
+      <Setter Property="Background" Value="{DynamicResource GhostHoverBrush}" />
     </Style>
     <Style Selector="Button.danger">
       <Setter Property="Background" Value="#e05252" />
@@ -64,16 +90,16 @@
       <Setter Property="Background" Value="#ec6b6b" />
     </Style>
     <Style Selector="DataGridColumnHeader">
-      <Setter Property="Background" Value="#1b1f27" />
-      <Setter Property="Foreground" Value="#98a0b0" />
+      <Setter Property="Background" Value="{DynamicResource SideBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource TextMutedBrush}" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Padding" Value="10,8" />
-      <Setter Property="BorderBrush" Value="#2a2f3a" />
+      <Setter Property="BorderBrush" Value="{DynamicResource LineBrush}" />
       <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
     <Style Selector="DataGridCell">
       <Setter Property="Background" Value="Transparent" />
-      <Setter Property="Foreground" Value="#d7dce6" />
+      <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
       <Setter Property="Padding" Value="8,6" />
       <Setter Property="BorderThickness" Value="0" />
     </Style>

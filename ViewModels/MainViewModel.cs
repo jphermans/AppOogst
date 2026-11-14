@@ -28,6 +28,7 @@ public partial class MainViewModel : ViewModelBase
     [ObservableProperty] private string _loginEmail = "";
     [ObservableProperty] private string _loginPassword = "";
     [ObservableProperty] private string _login2fa = "";
+    [ObservableProperty] private int _themeIndex;
 
     [ObservableProperty] private string _searchTerm = "";
     [ObservableProperty] private string _searchPlatform = "alle (standaard)";
@@ -55,6 +56,7 @@ public partial class MainViewModel : ViewModelBase
         new[] { "alle (standaard)" }.Concat(IpatoolService.Platforms).ToArray();
     public string[] PurchasePlatformChoices { get; } =
         new[] { "alle" }.Concat(IpatoolService.Platforms).ToArray();
+    public string[] ThemeChoices { get; } = ThemeManager.ThemeChoices;
     public string[] LimitChoices { get; } = { "5", "10", "20", "50" };
     public string[] MaxChoices { get; } = { "10", "25", "50", "100", "200" };
 
@@ -64,8 +66,11 @@ public partial class MainViewModel : ViewModelBase
     public bool IsDownloadPage => CurrentPageIndex == 3;
     public bool IsLogPage => CurrentPageIndex == 4;
 
+    partial void OnThemeIndexChanged(int value) => ThemeManager.Apply(value);
+
     public MainViewModel(bool autoAuth = true)
     {
+        _themeIndex = ThemeManager.Load();
         _queue.BusyChanged += b => Dispatcher.UIThread.Post(() => Busy = b);
         _queue.StatusChanged += s => Dispatcher.UIThread.Post(() => StatusText = s);
         Log("AppOogst (C#/Avalonia) started");

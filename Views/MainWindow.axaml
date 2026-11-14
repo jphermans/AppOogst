@@ -7,7 +7,7 @@
         Title="AppOogst"
         Icon="avares://AppOogst/Assets/appoogst.ico"
         Width="1180" Height="760"
-        Background="#14161b">
+        Background="{DynamicResource AppBgBrush}">
   <NativeMenu.Menu>
     <NativeMenu>
       <NativeMenuItem Header="About AppOogst" Click="AboutMenu_Click" />
@@ -23,7 +23,7 @@
   <Grid ColumnDefinitions="220,*">
 
     <!-- ============ sidebar ============ -->
-    <Grid Grid.Column="0" Background="#1b1f27" RowDefinitions="Auto,*,Auto">
+    <Grid Grid.Column="0" Background="{DynamicResource SideBrush}" RowDefinitions="Auto,*,Auto">
       <StackPanel Grid.Row="0" Margin="18,18,18,10">
         <TextBlock Classes="h1" Text="AppOogst" />
         <TextBlock Classes="muted" Text="C# / Avalonia — macOS" FontSize="12" Margin="0,2,0,0" />
@@ -34,18 +34,21 @@
                SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <TextBlock Text="{Binding}" FontSize="15" Foreground="#c7ccd8" Margin="4,0" />
+            <TextBlock Text="{Binding}" FontSize="15" Foreground="{DynamicResource TextSecondaryBrush}" Margin="4,0" />
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>
 
       <StackPanel Grid.Row="2" Margin="18,10,18,16" Spacing="6">
+        <TextBlock Text="theme" Classes="muted" FontSize="12" />
+        <ComboBox ItemsSource="{Binding ThemeChoices}" SelectedIndex="{ReflectionBinding ThemeIndex}"
+                  Width="190" HorizontalAlignment="Left" Margin="0,2,0,6" />
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Ellipse Width="10" Height="10"
                    Fill="{Binding AuthOk, Converter={StaticResource LedBrush}}" />
           <TextBlock Text="account" Classes="muted" FontSize="12" />
         </StackPanel>
-        <TextBlock Text="{Binding SideEmail}" FontSize="12" Foreground="#c7ccd8"
+        <TextBlock Text="{Binding SideEmail}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"
                    TextTrimming="CharacterEllipsis" />
       </StackPanel>
     </Grid>
@@ -108,7 +111,7 @@
               <DataGrid x:Name="SearchGrid" Height="380" HeadersVisibility="Column"
                         CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="True"
                         IsReadOnly="True" GridLinesVisibility="Horizontal"
-                        Background="Transparent" RowBackground="#1e222b"
+                        Background="Transparent" RowBackground="{DynamicResource CardBrush}"
                         HorizontalGridLinesBrush="#262b36" BorderThickness="0"
                         ItemsSource="{Binding SearchResults}"
                         SelectedItem="{ReflectionBinding SelectedSearchApp}"
@@ -142,7 +145,7 @@
                   <Button Classes="accent" Content="Refresh" Command="{Binding LoadPurchasesCommand}" />
                   <Button Classes="ghost" Content="Next page" Command="{Binding NextPurchasePageCommand}" />
                   <Button Classes="ghost" Content="To download" Command="{Binding DownloadSelectedPurchaseCommand}" />
-                  <TextBlock Text="{Binding PurchasePageLabel}" VerticalAlignment="Center" Foreground="#c7ccd8" />
+                  <TextBlock Text="{Binding PurchasePageLabel}" VerticalAlignment="Center" Foreground="{DynamicResource TextSecondaryBrush}" />
                 </StackPanel>
                 <TextBlock Classes="muted" FontSize="12"
                            Text="The list loads automatically on first visit (can take 10–15 s). Selecting an app fills the Download form automatically; double-click jumps straight to Download." />
@@ -152,7 +155,7 @@
               <DataGrid x:Name="PurchasesGrid" Height="430" HeadersVisibility="Column"
                         CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="True"
                         IsReadOnly="True" GridLinesVisibility="Horizontal"
-                        Background="Transparent" RowBackground="#1e222b"
+                        Background="Transparent" RowBackground="{DynamicResource CardBrush}"
                         HorizontalGridLinesBrush="#262b36" BorderThickness="0"
                         ItemsSource="{Binding Purchases}"
                         SelectedItem="{ReflectionBinding SelectedPurchaseApp}"
@@ -212,11 +215,11 @@
       </ScrollViewer>
 
       <!-- status bar -->
-      <Border Grid.Row="1" Background="#1b1f27" BorderBrush="#2a2f3a" BorderThickness="0,1,0,0" Padding="16,8">
+      <Border Grid.Row="1" Background="{DynamicResource SideBrush}" BorderBrush="{DynamicResource LineBrush}" BorderThickness="0,1,0,0" Padding="16,8">
         <StackPanel Orientation="Horizontal" Spacing="12">
           <ProgressBar IsIndeterminate="True" Width="90" Height="6" VerticalAlignment="Center"
                        IsVisible="{Binding Busy}" />
-          <TextBlock Text="{Binding StatusText}" Foreground="#c7ccd8" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
         </StackPanel>
       </Border>
     </Grid>
