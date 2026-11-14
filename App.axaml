@@ -1,0 +1,87 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="AppOogst.App"
+             RequestedThemeVariant="Dark">
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
+  <Application.Styles>
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="#1e222b" />
+      <Setter Property="BorderBrush" Value="#2a2f3a" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="16" />
+    </Style>
+    <Style Selector="TextBlock.h1">
+      <Setter Property="FontSize" Value="18" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#eef1f7" />
+    </Style>
+    <Style Selector="TextBlock.h2">
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="#98a0b0" />
+    </Style>
+    <Style Selector="TextBlock.muted">
+      <Setter Property="Foreground" Value="#98a0b0" />
+    </Style>
+    <Style Selector="Button.accent">
+      <Setter Property="Background" Value="#5b9dff" />
+      <Setter Property="Foreground" Value="#ffffff" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="14,8" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Button.accent:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#6fa8ff" />
+    </Style>
+    <Style Selector="Button.accent:pressed /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#4c8ae8" />
+    </Style>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="#2a2f3a" />
+      <Setter Property="Foreground" Value="#d7dce6" />
+      <Setter Property="Padding" Value="14,8" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#363c49" />
+    </Style>
+    <Style Selector="Button.danger">
+      <Setter Property="Background" Value="#e05252" />
+      <Setter Property="Foreground" Value="#ffffff" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="14,8" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Button.danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#ec6b6b" />
+    </Style>
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="Background" Value="#1b1f27" />
+      <Setter Property="Foreground" Value="#98a0b0" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="BorderBrush" Value="#2a2f3a" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+    <Style Selector="DataGridCell">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Foreground" Value="#d7dce6" />
+      <Setter Property="Padding" Value="8,6" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="DataGridCell:focus /template/ Border#PART_BorderBackground">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="DataGridRow">
+      <Setter Property="MinHeight" Value="34" />
+    </Style>
+  </Application.Styles>
+</Application>

@@ -1,0 +1,84 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.rid }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+            ipa_regex: 'linux-(amd64|x64)'
+            ipa_ext: ''
+          - os: windows-latest
+            rid: win-x64
+            ipa_regex: 'windows-(amd64|x64)'
+            ipa_ext: '.exe'
+          - os: macos-latest
+            rid: osx-arm64
+            ipa_regex: 'macos-arm64|ios-arm64'
+            ipa_ext: ''
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 11.0.x
+
+      - name: Publish self-contained
+        run: dotnet publish -c Release -r ${{ matrix.rid }} --self-contained true -o publish
+
+      - name: Bundle ipatool binary
+        run: |
+          set -euo pipefail
+          url=$(curl -s https://api.github.com/repos/majd/ipatool/releases/latest \
+            | jq -r '.assets[] | select(.name | test("${{ matrix.ipa_regex }}")) | .browser_download_url' \
+            | head -n1)
+          if [ -z "$url" ]; then
+            echo "No matching ipatool asset for ${{ matrix.rid }}"; exit 1
+          fi
+          echo "Downloading ipatool: $url"
+          curl -sL "$url" -o ipatool-dl
+          mkdir -p ipatool-ex
+          case "$url" in
+            *.tar.gz) tar -xzf ipatool-dl -C ipatool-ex ;;
+            *.zip)    unzip -q ipatool-dl -d ipatool-ex ;;
+            *) echo "Unknown archive type: $url"; exit 1 ;;
+          esac
+          bin=$(find ipatool-ex -type f -name 'ipatool*${{ matrix.ipa_ext }}' | head -n1)
+          if [ -z "$bin" ]; then
+            echo "ipatool binary not found inside archive"; ls -R ipatool-ex; exit 1
+          fi
+          cp "$bin" "publish/ipatool${{ matrix.ipa_ext }}"
+          chmod +x "publish/ipatool${{ matrix.ipa_ext }}" 2>/dev/null || true
+          echo "Bundled: publish/ipatool${{ matrix.ipa_ext }}"
+
+      - name: Archive
+        run: |
+          set -euo pipefail
+          name="AppOogst-${GITHUB_REF_NAME}-${{ matrix.rid }}"
+          mv publish "$name"
+          if [ "${{ matrix.rid }}" = "win-x64" ]; then
+            powershell -NoProfile -Command "Compress-Archive -Path '$name' -DestinationPath '$name.zip'"
+          else
+            tar -czf "$name.tar.gz" "$name"
+          fi
+          ls -lh AppOogst-*
+
+      - name: Attach release assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: AppOogst-*

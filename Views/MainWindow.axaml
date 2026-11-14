@@ -1,0 +1,217 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AppOogst.ViewModels"
+        xmlns:conv="using:AppOogst.Converters"
+        x:Class="AppOogst.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="AppOogst"
+        Icon="avares://AppOogst/Assets/appoogst.ico"
+        Width="1180" Height="760"
+        Background="#14161b">
+  <Window.Resources>
+    <conv:LogBrushConverter x:Key="LogBrush" />
+    <conv:BoolBrushConverter x:Key="LedBrush" />
+  </Window.Resources>
+
+  <Grid ColumnDefinitions="220,*">
+
+    <!-- ============ sidebar ============ -->
+    <Grid Grid.Column="0" Background="#1b1f27" RowDefinitions="Auto,*,Auto">
+      <StackPanel Grid.Row="0" Margin="18,18,18,10">
+        <TextBlock Classes="h1" Text="AppOogst" />
+        <TextBlock Classes="muted" Text="C# / Avalonia — macOS" FontSize="12" Margin="0,2,0,0" />
+      </StackPanel>
+
+      <ListBox Grid.Row="1" x:Name="NavList" Margin="8,0"
+               ItemsSource="{x:Static vm:MainViewModel.PageLabels}"
+               SelectedIndex="{Binding CurrentPageIndex, Mode=TwoWay}">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" FontSize="15" Foreground="#c7ccd8" Margin="4,0" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <StackPanel Grid.Row="2" Margin="18,10,18,16" Spacing="6">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Ellipse Width="10" Height="10"
+                   Fill="{Binding AuthOk, Converter={StaticResource LedBrush}}" />
+          <TextBlock Text="account" Classes="muted" FontSize="12" />
+        </StackPanel>
+        <TextBlock Text="{Binding SideEmail}" FontSize="12" Foreground="#c7ccd8"
+                   TextTrimming="CharacterEllipsis" />
+      </StackPanel>
+    </Grid>
+
+    <!-- ============ main pages ============ -->
+    <Grid Grid.Column="1" RowDefinitions="*,Auto">
+      <ScrollViewer Grid.Row="0">
+        <Panel Margin="20">
+
+          <!-- Account -->
+          <StackPanel Spacing="14" IsVisible="{Binding IsAccountPage}">
+            <TextBlock Classes="h1" Text="Account" />
+            <Border Classes="card" MaxWidth="640" HorizontalAlignment="Left">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="h2" Text="STATUS" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <Ellipse Width="12" Height="12" VerticalAlignment="Center"
+                           Fill="{Binding AuthOk, Converter={StaticResource LedBrush}}" />
+                  <TextBlock Text="{Binding AuthDisplay}" FontSize="15" />
+                </StackPanel>
+                <TextBlock Classes="muted" FontSize="12"
+                           Text="Credentials are managed by ipatool itself in the macOS Keychain; this GUI never stores or logs passwords."
+                           TextWrapping="Wrap" />
+                <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,6,0,0">
+                  <Button Classes="ghost" Content="Refresh" Command="{Binding RefreshAuthCommand}" />
+                  <Button Classes="danger" Content="Sign out" Command="{Binding RevokeCommand}" />
+                </StackPanel>
+              </StackPanel>
+            </Border>
+            <Border Classes="card" MaxWidth="640" HorizontalAlignment="Left">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="h2" Text="SIGN IN" />
+                <TextBox Watermark="email address" Text="{Binding LoginEmail, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
+                <TextBox Watermark="password" PasswordChar="•" Width="380" HorizontalAlignment="Left"
+                         Text="{Binding LoginPassword, Mode=TwoWay}" />
+                <TextBox Watermark="2FA code (optional)" Text="{Binding Login2fa, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
+                <Button Classes="accent" Content="Sign in" Command="{Binding LoginCommand}" HorizontalAlignment="Left" Margin="0,4,0,0" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Search -->
+          <StackPanel Spacing="14" IsVisible="{Binding IsSearchPage}">
+            <TextBlock Classes="h1" Text="Search" />
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBox Watermark="search term" Text="{Binding SearchTerm, Mode=TwoWay}" Width="260" />
+                  <ComboBox MinWidth="170" ItemsSource="{Binding SearchPlatformChoices}"
+                            SelectedItem="{ReflectionBinding SearchPlatform}" />
+                  <ComboBox MinWidth="90" ItemsSource="{Binding LimitChoices}"
+                            SelectedItem="{ReflectionBinding SearchLimitText}" />
+                  <Button Classes="accent" Content="Search" Command="{Binding SearchCommand}" />
+                </StackPanel>
+                <TextBlock Classes="muted" FontSize="12"
+                           Text="Double-click a result to jump straight to Download (the form is filled automatically)." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card" Padding="8">
+              <DataGrid x:Name="SearchGrid" Height="380" HeadersVisibility="Column"
+                        CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="True"
+                        IsReadOnly="True" GridLinesVisibility="Horizontal"
+                        Background="Transparent" RowBackground="#1e222b"
+                        HorizontalGridLinesBrush="#262b36" BorderThickness="0"
+                        ItemsSource="{Binding SearchResults}"
+                        SelectedItem="{ReflectionBinding SelectedSearchApp}"
+                        DoubleTapped="SearchGrid_DoubleTapped">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Id" Binding="{ReflectionBinding Id}" Width="100" />
+                  <DataGridTextColumn Header="Name" Binding="{ReflectionBinding Name}" Width="2.2*" />
+                  <DataGridTextColumn Header="Bundle-ID" Binding="{ReflectionBinding BundleId}" Width="260" />
+                  <DataGridTextColumn Header="Version" Binding="{ReflectionBinding Version}" Width="110" />
+                  <DataGridTextColumn Header="Price" Binding="{ReflectionBinding PriceText}" Width="90" />
+                  <DataGridTextColumn Header="Platforms" Binding="{ReflectionBinding PlatformsText}" Width="200" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </Border>
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <Button Classes="ghost" Content="To download" Command="{Binding DownloadSelectedSearchCommand}" />
+              <Button Classes="ghost" Content="Buy license" Command="{Binding BuySelectedSearchCommand}" />
+            </StackPanel>
+          </StackPanel>
+
+          <!-- Purchases -->
+          <StackPanel Spacing="14" IsVisible="{Binding IsPurchasesPage}">
+            <TextBlock Classes="h1" Text="Purchases" />
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <ComboBox MinWidth="150" ItemsSource="{Binding PurchasePlatformChoices}"
+                            SelectedItem="{ReflectionBinding PurchasePlatform}" />
+                  <ComboBox MinWidth="100" ItemsSource="{Binding MaxChoices}"
+                            SelectedItem="{ReflectionBinding PurchaseMaxText}" />
+                  <Button Classes="accent" Content="Refresh" Command="{Binding LoadPurchasesCommand}" />
+                  <Button Classes="ghost" Content="Next page" Command="{Binding NextPurchasePageCommand}" />
+                  <Button Classes="ghost" Content="To download" Command="{Binding DownloadSelectedPurchaseCommand}" />
+                  <TextBlock Text="{Binding PurchasePageLabel}" VerticalAlignment="Center" Foreground="#c7ccd8" />
+                </StackPanel>
+                <TextBlock Classes="muted" FontSize="12"
+                           Text="The list loads automatically on first visit (can take 10–15 s). Selecting an app fills the Download form automatically; double-click jumps straight to Download." />
+              </StackPanel>
+            </Border>
+            <Border Classes="card" Padding="8">
+              <DataGrid x:Name="PurchasesGrid" Height="430" HeadersVisibility="Column"
+                        CanUserReorderColumns="False" CanUserResizeColumns="True" CanUserSortColumns="True"
+                        IsReadOnly="True" GridLinesVisibility="Horizontal"
+                        Background="Transparent" RowBackground="#1e222b"
+                        HorizontalGridLinesBrush="#262b36" BorderThickness="0"
+                        ItemsSource="{Binding Purchases}"
+                        SelectedItem="{ReflectionBinding SelectedPurchaseApp}"
+                        SelectionChanged="PurchasesGrid_SelectionChanged"
+                        DoubleTapped="PurchasesGrid_DoubleTapped">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Id" Binding="{ReflectionBinding Id}" Width="110" />
+                  <DataGridTextColumn Header="Name" Binding="{ReflectionBinding Name}" Width="2.2*" />
+                  <DataGridTextColumn Header="Bundle-ID" Binding="{ReflectionBinding BundleId}" Width="260" />
+                  <DataGridTextColumn Header="Version" Binding="{ReflectionBinding Version}" Width="110" />
+                  <DataGridTextColumn Header="Price" Binding="{ReflectionBinding PriceText}" Width="90" />
+                  <DataGridTextColumn Header="Platforms" Binding="{ReflectionBinding PlatformsText}" Width="200" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </Border>
+          </StackPanel>
+
+          <!-- Download -->
+          <StackPanel Spacing="14" IsVisible="{Binding IsDownloadPage}">
+            <TextBlock Classes="h1" Text="Download" />
+            <Border Classes="card" MaxWidth="640" HorizontalAlignment="Left">
+              <StackPanel Spacing="10">
+                <TextBlock Classes="h2" Text="APP" />
+                <TextBox Watermark="App ID (numeric)" Text="{Binding DlAppId, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
+                <TextBox Watermark="or Bundle ID" Text="{Binding DlBundle, Mode=TwoWay}" Width="380" HorizontalAlignment="Left" />
+                <ComboBox MinWidth="170" ItemsSource="{Binding SearchPlatformChoices}"
+                          SelectedItem="{ReflectionBinding DlPlatform}" HorizontalAlignment="Left" />
+                <TextBlock Classes="h2" Text="DESTINATION" Margin="0,8,0,0" />
+                <StackPanel Orientation="Horizontal" Spacing="10">
+                  <TextBox Text="{Binding DlOutputDir, Mode=TwoWay}" Width="380" />
+                  <Button Classes="ghost" Content="Browse …" Click="PickFolder_Click" />
+                </StackPanel>
+                <CheckBox IsChecked="{ReflectionBinding DlPurchase}" Content="Automatically buy license if needed (--purchase)" />
+                <Button Classes="accent" Content="Start download" Command="{Binding StartDownloadCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Log -->
+          <StackPanel Spacing="14" IsVisible="{Binding IsLogPage}">
+            <TextBlock Classes="h1" Text="Log" />
+            <Border Classes="card" Padding="8">
+              <ListBox x:Name="LogList" Height="520"
+                       ItemsSource="{Binding LogEntries}" SelectionMode="AlwaysSelected">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:LogEntry">
+                    <TextBlock Text="{Binding Text}"
+                               Foreground="{Binding Level, Converter={StaticResource LogBrush}}"
+                               FontFamily="Menlo,Consolas,DejaVu Sans Mono" FontSize="12.5" />
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </Border>
+          </StackPanel>
+
+        </Panel>
+      </ScrollViewer>
+
+      <!-- status bar -->
+      <Border Grid.Row="1" Background="#1b1f27" BorderBrush="#2a2f3a" BorderThickness="0,1,0,0" Padding="16,8">
+        <StackPanel Orientation="Horizontal" Spacing="12">
+          <ProgressBar IsIndeterminate="True" Width="90" Height="6" VerticalAlignment="Center"
+                       IsVisible="{Binding Busy}" />
+          <TextBlock Text="{Binding StatusText}" Foreground="#c7ccd8" VerticalAlignment="Center" />
+        </StackPanel>
+      </Border>
+    </Grid>
+  </Grid>
+</Window>
