@@ -173,20 +173,28 @@ public partial class MainViewModel : ViewModelBase
             if (twofa.Length > 0)
                 args.AddRange(new[] { "--auth-code", twofa });
             var res = await IpatoolService.RunAsync(IpatoolService.BuildArgs(args.ToArray()), Log);
-            if (res.ExitCode == 0)
-            {
-                Log("sign-in successful");
-                await RefreshAuthCoreAsync();
-            }
-            else
+            if (res.ExitCode != 0)
             {
                 var reason = IpatoolService.ExtractLastError(IpatoolService.ParseJsonLines(res.Lines));
                 if (reason.Contains("2FA code is required", StringComparison.OrdinalIgnoreCase))
                     reason = "2FA code is required — enter your 6-digit code from a trusted device and sign in again";
+                Log($"sign-in reported failure (exit {res.ExitCode}): {reason}");
+                SetStatus("login error — verifying stored session before reporting failure ...");
+                // ipatool can store a valid session and still exit non-zero (known
+                // Apple AMS dialog issue) — always verify before declaring defeat.
+                await RefreshAuthCoreAsync();
+                if (AuthOk)
+                {
+                    Log("session verified after non-zero exit — sign-in actually succeeded");
+                    SetStatus("sign-in succeeded (session verified)");
+                    return;
+                }
                 Log($"sign-in FAILED (exit {res.ExitCode}): {reason}");
                 SetStatus($"sign-in failed: {reason}");
                 return;
             }
+            Log("sign-in successful");
+            await RefreshAuthCoreAsync();
             SetStatus("sign-in finished successfully");
         }, "signing in ...");
     }
