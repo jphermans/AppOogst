@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="Assets/icon.png" alt="AppOogst icon" width="120">
+</p>
+
 # AppOogst
 
 **AppOogst** (Dutch for *"app harvest"*) is a modern, dark-themed desktop app for macOS that lets you **harvest your own purchased App Store apps as `.ipa` files**. It is a friendly graphical front-end for the excellent open-source [ipatool](https://github.com/majd/ipatool) CLI.
