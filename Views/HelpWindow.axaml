@@ -1,0 +1,75 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AppOogst.Views.HelpWindow"
+        Title="AppOogst Help"
+        Width="700" Height="640"
+        WindowStartupLocation="CenterOwner"
+        Background="#14161b">
+  <ScrollViewer>
+    <StackPanel Margin="24" Spacing="12">
+      <TextBlock Classes="h1" Text="How to use AppOogst" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="AppOogst harvests apps you already bought on the App Store into .ipa files, using the bundled ipatool CLI. Work top to bottom: sign in once, then pick or search an app and download it." />
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="1 · Account — sign in once" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Open the Account page in the sidebar." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Enter your Apple ID e-mail and password (plus the 2FA code if prompted) and press Sign in." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Credentials are managed by ipatool in the macOS Keychain — AppOogst never sees or logs your password." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Use Sign out to remove the credentials again." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="2 · Search — find any App Store app" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Enter a search term, pick a platform (iphone, ipad, macos, …) and a result limit, then press Search." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Double-click a result to jump to Download with everything prefilled." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Use Buy if you do not own a license for the app yet." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="3 · Purchases — apps tied to your Apple ID" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The list loads automatically the first time you open the page: 50 apps per page with a total counter (page 1 — 50 of 2704 apps)." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Click a row: App ID, Bundle ID and platform are filled into the Download form automatically (select-to-fill)." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Double-click a row to jump straight to Download. Use Next page to browse further." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Listing can take 10–15 seconds (Apple's servers) — watch the status bar." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="4 · Download — get the .ipa" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The form is usually already filled (select-to-fill or double-click); you can also type an App ID or Bundle ID yourself." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Choose a destination folder with Browse. The default is your Downloads folder." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Keep 'Buy license if needed' enabled — a missing license is purchased automatically." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Press Download start: progress shows in the status bar and details appear in the Log page." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="5 · Log &amp; troubleshooting" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The log is color-coded: blue = command sent, green = success, red = error." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Actions clicked while another one is running are queued automatically (max 3) and run afterwards — no lost clicks." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The bundled ipatool binary is used automatically — no separate installation needed (a system ipatool is used as fallback)." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• If a download fails, check the log — most failures are a missing license (enable auto-buy) or a network hiccup (retry)." />
+        </StackPanel>
+      </Border>
+
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="Keyboard &amp; shortcuts" />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• F1 — open this Help screen." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Help menu (menu bar) — AppOogst Help and About AppOogst." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Double-click rows in Search and Purchases as a shortcut to Download." />
+        </StackPanel>
+      </Border>
+
+      <Button Classes="accent" Content="Close" HorizontalAlignment="Center" Click="Close_Click" />
+    </StackPanel>
+  </ScrollViewer>
+</Window>

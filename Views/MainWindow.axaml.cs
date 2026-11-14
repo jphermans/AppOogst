@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -15,6 +16,11 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         HookVm();
+        KeyDown += (_, e) =>
+        {
+            if (e.Key == global::Avalonia.Input.Key.F1)
+                HelpMenu_Click(this, e);
+        };
         DataContextChanged += (_, _) => HookVm();
     }
 
@@ -57,4 +63,10 @@ public partial class MainWindow : Window
         if (folders.Count > 0 && DataContext is MainViewModel vm)
             vm.DlOutputDir = folders[0].Path.LocalPath;
     }
+
+    private void HelpMenu_Click(object? sender, EventArgs e)
+        => new HelpWindow(this).Show();
+
+    private void AboutMenu_Click(object? sender, EventArgs e)
+        => new AboutWindow(this).Show();
 }

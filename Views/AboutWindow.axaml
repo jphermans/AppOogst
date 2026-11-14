@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="AppOogst.Views.AboutWindow"
+        Title="About AppOogst"
+        Width="460" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Background="#14161b">
+  <Panel Margin="28,24">
+    <StackPanel Spacing="10">
+      <Image Source="avares://AppOogst/Assets/icon.png" Width="96" Height="96" HorizontalAlignment="Center" />
+      <TextBlock Classes="h1" Text="AppOogst" FontSize="26" HorizontalAlignment="Center" />
+      <TextBlock x:Name="VersionText" Classes="muted" HorizontalAlignment="Center" />
+      <TextBlock Classes="muted" Text="Harvest your own purchased App Store apps as .ipa files"
+                 TextWrapping="Wrap" TextAlignment="Center" Margin="0,4,0,8" />
+      <Border Classes="card">
+        <StackPanel Spacing="6">
+          <TextBlock Classes="h2" Text="Built on open source" />
+          <TextBlock Classes="muted" TextWrapping="Wrap"
+                     Text="AppOogst is a friendly graphical front-end for the excellent open-source ipatool CLI by majd (MIT)." />
+          <TextBlock Classes="muted" Text="© 2026 Jean-Pierre Hermans · MIT License" />
+        </StackPanel>
+      </Border>
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center" Margin="0,8,0,0">
+        <Button Classes="ghost" Content="Project page" Click="OpenProject_Click" />
+        <Button Classes="accent" Content="Close" Click="Close_Click" />
+      </StackPanel>
+    </StackPanel>
+  </Panel>
+</Window>

@@ -8,6 +8,13 @@
         Icon="avares://AppOogst/Assets/appoogst.ico"
         Width="1180" Height="760"
         Background="#14161b">
+  <NativeMenu.Menu>
+    <NativeMenu>
+      <NativeMenuItem Header="About AppOogst" Click="AboutMenu_Click" />
+      <NativeMenuItemSeparator />
+      <NativeMenuItem Header="AppOogst Help" Click="HelpMenu_Click" />
+    </NativeMenu>
+  </NativeMenu.Menu>
   <Window.Resources>
     <conv:LogBrushConverter x:Key="LogBrush" />
     <conv:BoolBrushConverter x:Key="LedBrush" />

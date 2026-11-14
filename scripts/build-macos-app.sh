@@ -6,6 +6,8 @@ SRC="$1"; VER="$2"; DMG="$3"
 APP="AppOogst.app"
 rm -rf "$APP" "$APP.dmg"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+# PkgInfo is required for LaunchServices to identify the bundle (menu bar name, Dock)
+printf 'APPL????' > "$APP/Contents/PkgInfo"
 # icns from Assets/icon.png
 cd "$(dirname "$0")/.."
 mkdir -p /tmp/appoogst.iconset
@@ -42,5 +44,7 @@ if [ -f "$SRC/ipatool" ]; then
 fi
 codesign --force --deep --sign - "$APP"
 echo "bundle: $APP"
-hdiutil create -volname AppOogst -srcfolder "$APP" -ov -format UDZO "$DMG"
-echo "dmg: $DMG"
+if [ "$DMG" != "none" ]; then
+  hdiutil create -volname AppOogst -srcfolder "$APP" -ov -format UDZO "$DMG"
+  echo "dmg: $DMG"
+fi
