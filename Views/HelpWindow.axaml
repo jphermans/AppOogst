@@ -57,6 +57,7 @@
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The log is color-coded: blue = command sent, green = success, red = error." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Actions clicked while another one is running are queued automatically (max 3) and run afterwards — no lost clicks." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The bundled ipatool binary is used automatically — no separate installation needed (a system ipatool is used as fallback)." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The first log lines name the ipatool binary and its version. If a command dies with exit 137 or the app says ipatool is unavailable, the bundled helper cannot execute: run AppOogst --diagnose in a terminal for a plain-text report." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• If a download fails, check the log — most failures are a missing license (enable auto-buy) or a network hiccup (retry)." />
         </StackPanel>
       </Border>

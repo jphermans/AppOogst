@@ -38,11 +38,20 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 PLIST
 cp "$SRC/AppOogst" "$APP/Contents/MacOS/AppOogst"
 chmod +x "$APP/Contents/MacOS/AppOogst"
-if [ -f "$SRC/ipatool" ]; then
-  cp "$SRC/ipatool" "$APP/Contents/MacOS/ipatool"
-  chmod +x "$APP/Contents/MacOS/ipatool"
+if [ ! -f "$SRC/ipatool" ]; then
+  echo "error: $SRC/ipatool is missing — the app cannot log in without it" >&2
+  exit 1
 fi
-codesign --force --deep --sign - "$APP"
+cp "$SRC/ipatool" "$APP/Contents/MacOS/ipatool"
+chmod +x "$APP/Contents/MacOS/ipatool"
+# Sign the bundle WITHOUT --deep. --deep re-signs the bundled ipatool with a
+# plain ad-hoc signature, and macOS kills an ad-hoc-signed third-party helper
+# (SIGKILL, exit 137) as soon as the downloaded DMG leaves
+# com.apple.quarantine on the file — that made every command, login included,
+# die instantly in v0.1.3. Keeping upstream's own signature is what makes the
+# quarantine-safe case work; the app also clears the flag at startup.
+codesign --force --sign - "$APP"
+codesign --verify --strict "$APP"
 echo "bundle: $APP"
 if [ "$DMG" != "none" ]; then
   hdiutil create -volname AppOogst -srcfolder "$APP" -ov -format UDZO "$DMG"

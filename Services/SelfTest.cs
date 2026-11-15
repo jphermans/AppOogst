@@ -72,8 +72,24 @@ public static class SelfTest
         Check("PrefillDownloadFrom", () => vm.DlAppId == "389801252"
             && vm.DlBundle == "com.burbn.instagram" && vm.DlPlatform == "iphone");
 
-        Check("Locate returns a candidate", () =>
+        Check("BinaryPath resolved", () =>
             !string.IsNullOrWhiteSpace(IpatoolService.BinaryPath));
+
+        // A packaged build can carry a helper that exists but cannot execute
+        // (wrong platform slice or quarantine-blocked). The status must always
+        // explain what happened instead of silently reporting a candidate.
+        Check("ipatool status has diagnostics", () =>
+            IpatoolService.Status.Diagnostics.Count > 0
+            && (!IpatoolService.Status.Runnable || IpatoolService.Status.Version.Length > 0));
+
+        // Regression guard for the shipped bundle: when a helper sits next to the
+        // executable it MUST actually run. v0.1.3 shipped an iOS binary in the
+        // macOS app, which macOS kills at exec, and every command died with it.
+        var bundled = Path.Combine(AppContext.BaseDirectory,
+            OperatingSystem.IsWindows() ? "ipatool.exe" : "ipatool");
+        if (File.Exists(bundled))
+            Check("bundled ipatool runs", () =>
+                IpatoolService.Status.Runnable && IpatoolService.Status.Path == bundled);
 
         Check("ThemeManager variants", () =>
             ThemeManager.ResolveVariant(0) == ThemeVariant.Default
@@ -88,7 +104,7 @@ public static class SelfTest
         }));
         Check("ExtractLastError", () => errs.Contains("2FA code is required"));
 
-        if (results.All(r => r.Ok) && results.Count == 12)
+        if (results.All(r => r.Ok) && results.Count >= 13)
         {
             Console.WriteLine($"SELFTEST OK ({results.Count} checks)");
             return 0;

@@ -74,6 +74,20 @@ public partial class MainViewModel : ViewModelBase
         _queue.BusyChanged += b => Dispatcher.UIThread.Post(() => Busy = b);
         _queue.StatusChanged += s => Dispatcher.UIThread.Post(() => StatusText = s);
         Log("AppOogst (C#/Avalonia) started");
+
+        // Report the resolved helper up front. A blocked ipatool binary used to
+        // look like a failed login, because every command just logged "exit 137".
+        var tool = IpatoolService.Status;
+        Log($"ipatool: {tool.Path}");
+        foreach (var d in tool.Diagnostics)
+            Log("ipatool: " + d);
+        if (!tool.Runnable)
+        {
+            AuthDisplay = "ipatool unavailable — see Log";
+            SetStatus("ipatool cannot run on this machine; open AppOogst --diagnose for details");
+            return;
+        }
+
         if (autoAuth)
             Enqueue(() => RefreshAuthCoreAsync(), "fetching account status ...");
     }

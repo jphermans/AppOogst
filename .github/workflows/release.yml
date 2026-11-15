@@ -17,15 +17,22 @@ jobs:
         include:
           - os: ubuntu-latest
             rid: linux-x64
-            ipa_regex: 'linux-(amd64|x64)'
+            ipa_asset: '^ipatool-.*-linux-amd64[.]tar[.]gz$'
+            ipa_platform: linux
             ipa_ext: ''
           - os: windows-latest
             rid: win-x64
-            ipa_regex: 'windows-(amd64|x64)'
+            ipa_asset: '^ipatool-.*-windows-amd64[.]tar[.]gz$'
+            ipa_platform: windows
             ipa_ext: '.exe'
           - os: macos-latest
             rid: osx-arm64
-            ipa_regex: 'macos-arm64|ios-arm64'
+            # macOS ONLY. The old pattern 'macos-arm64|ios-arm64' matched
+            # ipatool-<v>-ios-arm64.tar.gz first (assets are alphabetical) and
+            # shipped an iOS binary inside the .app; macOS kills it at exec with
+            # SIGKILL 137, so every command — login included — died instantly.
+            ipa_asset: '^ipatool-.*-macos-arm64[.]tar[.]gz$'
+            ipa_platform: macos
             ipa_ext: ''
     runs-on: ${{ matrix.os }}
     defaults:
@@ -51,26 +58,50 @@ jobs:
             json=$(curl -s -H "Authorization: Bearer $GH_TOKEN" \
               https://api.github.com/repos/majd/ipatool/releases/latest || true)
             url=$(printf '%s' "$json" \
-              | jq -r '.assets[]? | select(.name | test("${{ matrix.ipa_regex }}")) | .browser_download_url' \
+              | jq -r '.assets[]? | select(.name | test("${{ matrix.ipa_asset }}")) | .browser_download_url' \
               | head -n1 || true)
             [ -n "$url" ] && break
             echo "Attempt $attempt: no matching asset (rate limit / transient API failure); retrying..."
             sleep $((attempt * 10))
           done
           if [ -z "$url" ]; then
-            echo "No matching ipatool asset for ${{ matrix.rid }}"; exit 1
+            echo "No matching ipatool asset for ${{ matrix.rid }} (pattern: ${{ matrix.ipa_asset }})"
+            echo "$json" | jq -r '.assets[]?.name' || true
+            exit 1
           fi
           echo "Downloading ipatool: $url"
+          # Belt and braces: an iOS build must never end up in a macOS bundle.
+          case "$url" in
+            *-ios-*) echo "refusing iOS asset for ${{ matrix.ipa_platform }}: $url"; exit 1 ;;
+            *-${{ matrix.ipa_platform }}-*) ;;
+            *) echo "asset does not look like a ${{ matrix.ipa_platform }} build: $url"; exit 1 ;;
+          esac
           curl -sL "$url" -o ipatool-dl
           mkdir -p ipatool-ex
           tar -xzf ipatool-dl -C ipatool-ex
-          bin=$(find ipatool-ex -type f -name 'ipatool*${{ matrix.ipa_ext }}' | head -n1)
+          bin=$(find ipatool-ex -type f -name 'ipatool*${{ matrix.ipa_ext }}' ! -name '*.tar.gz' | head -n1)
           if [ -z "$bin" ]; then
             echo "ipatool binary not found inside archive"; ls -R ipatool-ex; exit 1
           fi
           cp "$bin" "publish/ipatool${{ matrix.ipa_ext }}"
           chmod +x "publish/ipatool${{ matrix.ipa_ext }}" 2>/dev/null || true
-          echo "Bundled: publish/ipatool${{ matrix.ipa_ext }}"
+          echo "Bundled: publish/ipatool${{ matrix.ipa_ext }} ($(wc -c < "publish/ipatool${{ matrix.ipa_ext }}") bytes)"
+
+      - name: Verify bundled ipatool is the right platform and runs
+        run: |
+          set -euo pipefail
+          BIN="publish/ipatool${{ matrix.ipa_ext }}"
+          file "$BIN" || true
+          if [ "${{ matrix.ipa_platform }}" = "macos" ]; then
+            # platform 1 = macOS, 2 = iOS. A signature that verifies is not
+            # enough: an iOS slice is killed by AMFI on launch.
+            otool -l "$BIN" | grep -qE 'platform [0-9]+' || { echo "no LC_BUILD_VERSION in $BIN"; exit 1; }
+            plat=$(otool -l "$BIN" | awk '/LC_BUILD_VERSION/{getline; getline; print $2}')
+            echo "LC_BUILD_VERSION platform: $plat"
+            [ "$plat" = "1" ] || { echo "bundled ipatool is not a macOS build (platform $plat)"; exit 1; }
+          fi
+          "$BIN" --version | tee ipatool-version.txt
+          grep -qi '^ipatool version ' ipatool-version.txt || { echo "bundled ipatool did not report a version"; exit 1; }
 
       - name: Selftest (published binary)
         run: |
@@ -100,7 +131,9 @@ jobs:
           set -euo pipefail
           VER="${GITHUB_REF_NAME#v}"
           bash scripts/build-macos-app.sh publish "$VER" "AppOogst-${GITHUB_REF_NAME}-osx-arm64.dmg"
-          codesign --verify --deep AppOogst.app
+          codesign --verify --deep --strict AppOogst.app
+          # The bundle must be able to execute its own helper, signed or not.
+          AppOogst.app/Contents/MacOS/AppOogst --selftest
           ls -lh AppOogst-*
 
       - name: Attach release assets

@@ -13,6 +13,8 @@ sealed class Program
             return SelfTest.Run();
         if (args.Contains("--probe"))
             return Probe.RunAsync().GetAwaiter().GetResult();
+        if (args.Contains("--diagnose"))
+            return Diagnostics.RunAsync().GetAwaiter().GetResult();
 
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         return 0;

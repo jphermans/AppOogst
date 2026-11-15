@@ -7,7 +7,16 @@ public static class Probe
 {
     public static async Task<int> RunAsync()
     {
-        Console.WriteLine($"[0/3] using ipatool: {IpatoolService.BinaryPath}");
+        var status = IpatoolService.Status;
+        Console.WriteLine($"[0/3] using ipatool: {status.Path} ({(status.Runnable ? status.Version : "NOT RUNNABLE")})");
+        foreach (var d in status.Diagnostics)
+            Console.WriteLine($"      - {d}");
+        if (!status.Runnable)
+        {
+            Console.WriteLine("PROBE FAILED: ipatool cannot run — run --diagnose for details");
+            return 1;
+        }
+
         Console.WriteLine("[1/3] auth info ...");
         var r1 = await IpatoolService.RunAsync(IpatoolService.BuildArgs("auth", "info"));
         var auth = IpatoolService.ExtractAuth(IpatoolService.ParseJsonLines(r1.Lines));
