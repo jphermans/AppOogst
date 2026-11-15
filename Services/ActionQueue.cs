@@ -50,8 +50,10 @@ public sealed class ActionQueue
                 return;
             if (_pending.Count == 0)
             {
+                // Deliberately no "ready" status here: it used to overwrite the
+                // message the finished action had just set, so a failure like
+                // "purchases failed: …" was replaced by "ready" a tick later.
                 BusyChanged?.Invoke(false);
-                StatusChanged?.Invoke("ready");
                 return;
             }
             _busy = true;

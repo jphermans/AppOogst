@@ -16,7 +16,13 @@ public partial class MainViewModel : ViewModelBase
 
     private readonly ActionQueue _queue = new();
     private int _purchasePage = 1;
+    // "loaded" only after a SUCCESSFUL load; "loading" covers the queued window.
+    // The old single flag was set before the request ran, so one failed attempt
+    // (typically: the user opened Purchases before signing in, which used to be
+    // the only option) blocked every later visit — the list stayed empty even
+    // after a successful sign-in, with no error shown.
     private bool _purchasesLoaded;
+    private bool _purchasesLoading;
 
     [ObservableProperty] private int _currentPageIndex = 1;
     [ObservableProperty] private bool _busy;
@@ -68,11 +74,25 @@ public partial class MainViewModel : ViewModelBase
 
     partial void OnThemeIndexChanged(int value) => ThemeManager.Apply(value);
 
+    private string _lastStatus = "ready";
+
     public MainViewModel(bool autoAuth = true)
     {
         _themeIndex = ThemeManager.Load();
-        _queue.BusyChanged += b => Dispatcher.UIThread.Post(() => Busy = b);
-        _queue.StatusChanged += s => Dispatcher.UIThread.Post(() => StatusText = s);
+        _queue.BusyChanged += b => Dispatcher.UIThread.Post(() =>
+        {
+            Busy = b;
+            // Keep the last real result on screen once the queue drains; the busy
+            // text ("loading purchases ...") must not outlive the action either.
+            if (!b)
+                StatusText = _lastStatus;
+        });
+        _queue.StatusChanged += s =>
+        {
+            if (s.StartsWith("fout:", StringComparison.Ordinal))
+                _lastStatus = s;
+            Dispatcher.UIThread.Post(() => StatusText = s);
+        };
         Log("AppOogst (C#/Avalonia) started");
 
         // Report the resolved helper up front. A blocked ipatool binary used to
@@ -99,11 +119,8 @@ public partial class MainViewModel : ViewModelBase
         OnPropertyChanged(nameof(IsPurchasesPage));
         OnPropertyChanged(nameof(IsDownloadPage));
         OnPropertyChanged(nameof(IsLogPage));
-        if (PageNames[value] == "purchases" && !_purchasesLoaded)
-        {
-            _purchasesLoaded = true;
+        if (PageNames[value] == "purchases" && !_purchasesLoaded && !_purchasesLoading)
             LoadPurchases();
-        }
     }
 
     [RelayCommand]
@@ -126,12 +143,7 @@ public partial class MainViewModel : ViewModelBase
 
     public void Log(string text)
     {
-        var lower = text.ToLowerInvariant();
-        var level = text.Contains("ERR") ? "ERR"
-            : lower.Contains("warn") ? "WRN"
-            : text.StartsWith("$") ? "CMD"
-            : lower.Contains("successful") || lower.Contains("download ok") ? "OK"
-            : "INF";
+        var level = Classify(text);
         Dispatcher.UIThread.Post(() =>
         {
             LogEntries.Add(new LogEntry(text, level));
@@ -140,7 +152,38 @@ public partial class MainViewModel : ViewModelBase
         });
     }
 
-    private void SetStatus(string s) => Dispatcher.UIThread.Post(() => StatusText = s);
+    /// <summary>
+    /// Colour classification. Must not look for a bare "ERR" substring: ipatool
+    /// echoes full JSON payloads, so an app name like "WILDBERRIES" turned the
+    /// whole purchases response red and hid real errors. Judge by the structured
+    /// log level instead.
+    /// </summary>
+    private static string Classify(string text)
+    {
+        if (text.StartsWith("$ ", StringComparison.Ordinal))
+            return "CMD";
+
+        var lower = text.ToLowerInvariant();
+        if (lower.Contains("\"level\":\"error\"") || lower.Contains("\"level\":\"fatal\"")
+            || lower.Contains("sign-in failed") || lower.Contains("download failed")
+            || lower.Contains("was killed") || lower.Contains("could not be started")
+            || lower.StartsWith("fout:"))
+            return "ERR";
+
+        if (lower.Contains("\"level\":\"warn\""))
+            return "WRN";
+
+        if (lower.Contains("\"success\":true") || lower.Contains("successful") || lower.Contains("download ok"))
+            return "OK";
+
+        return "INF";
+    }
+
+    private void SetStatus(string s)
+    {
+        _lastStatus = s;
+        Dispatcher.UIThread.Post(() => StatusText = s);
+    }
 
     // ---------------------------------------------------------------- account
     private async Task RefreshAuthCoreAsync()
@@ -201,6 +244,7 @@ public partial class MainViewModel : ViewModelBase
                 {
                     Log("session verified after non-zero exit — sign-in actually succeeded");
                     SetStatus("sign-in succeeded (session verified)");
+                    ResetPurchases();
                     return;
                 }
                 Log($"sign-in FAILED (exit {res.ExitCode}): {reason}");
@@ -209,8 +253,21 @@ public partial class MainViewModel : ViewModelBase
             }
             Log("sign-in successful");
             await RefreshAuthCoreAsync();
+            ResetPurchases();
             SetStatus("sign-in finished successfully");
         }, "signing in ...");
+    }
+
+    /// <summary>
+    /// A different account may be signed in now, so the cached purchase list is
+    /// stale: forget it and refresh straight away when the page is open.
+    /// </summary>
+    private void ResetPurchases()
+    {
+        _purchasesLoaded = false;
+        _purchasePage = 1;
+        if (PageNames[CurrentPageIndex] == "purchases")
+            EnqueuePurchases();
     }
 
     [RelayCommand]
@@ -220,11 +277,15 @@ public partial class MainViewModel : ViewModelBase
         {
             Log("$ ipatool auth revoke");
             var res = await IpatoolService.RunAsync(IpatoolService.BuildArgs("auth", "revoke"), Log);
+            _purchasesLoaded = false;
+            _purchasePage = 1;
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 AuthDisplay = "Not signed in";
                 SideEmail = "not signed in";
                 AuthOk = false;
+                Purchases.Clear();
+                PurchasePageLabel = "page 1";
             });
             SetStatus($"signed out (exit {res.ExitCode})");
         }, "signing out ...");
@@ -296,7 +357,22 @@ public partial class MainViewModel : ViewModelBase
     }
 
     private void EnqueuePurchases()
-        => Enqueue(() => PurchasesCoreAsync(_purchasePage), "loading purchases ... (this may take a while)");
+    {
+        if (_purchasesLoading)
+            return;
+        _purchasesLoading = true;
+        Enqueue(async () =>
+        {
+            try
+            {
+                await PurchasesCoreAsync(_purchasePage);
+            }
+            finally
+            {
+                _purchasesLoading = false;
+            }
+        }, "loading purchases ... (this may take a while)");
+    }
 
     private async Task PurchasesCoreAsync(int page)
     {
@@ -311,13 +387,34 @@ public partial class MainViewModel : ViewModelBase
         var objs = IpatoolService.ParseJsonLines(res.Lines);
         var apps = IpatoolService.ExtractApps(objs);
         var total = IpatoolService.ExtractTotalCount(objs);
+
+        // Only a real answer counts as "loaded". A failed request must stay
+        // retryable, otherwise the page keeps an empty table forever.
+        var success = res.ExitCode == 0 && apps.Count > 0;
+        _purchasesLoaded = success;
+
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             Purchases.Clear();
             foreach (var a in apps)
                 Purchases.Add(a);
-            PurchasePageLabel = $"page {page}" + (total is { } t ? $" — {apps.Count} of {t} apps" : "");
+            PurchasePageLabel = success
+                ? $"page {page}" + (total is { } t ? $" — {apps.Count} of {t} apps" : "")
+                : $"page {page} — not loaded";
         });
+
+        if (!success)
+        {
+            var reason = IpatoolService.ExtractLastError(objs);
+            if (reason == "unknown error" && res.ExitCode != 0)
+                reason = res.Lines.LastOrDefault() ?? "no output";
+            Log($"purchases could not be loaded (exit {res.ExitCode}): {reason}");
+            SetStatus(AuthOk
+                ? $"purchases failed: {reason} — press Refresh to retry"
+                : "purchases need a signed-in account — sign in on the Account page first");
+            return;
+        }
+
         SetStatus($"purchases page {page}: {apps.Count} apps (exit {res.ExitCode})");
     }
 

@@ -16,7 +16,17 @@
 - **Action queue** — actions clicked while another action is running are queued (max 3) and run automatically — no lost clicks
 - **Color-coded log** — commands in blue, errors in red, successes in green
 - **Bundled ipatool** — the official binary ships inside every build and is self-repaired when the OS blocks it (see [Troubleshooting](#troubleshooting))
-- **Headless verification** — built-in self-test, real-CLI probe and `--diagnose` modes
+- **Headless verification** — built-in self-test, real-CLI probe, `--diagnose` and a `--shot` screenshot mode
+
+## Screenshots
+
+Purchases — the loaded list, with select-to-fill:
+
+![Purchases page](docs/screenshots/purchases.png)
+
+When the account is not signed in yet, the page says so instead of silently staying empty:
+
+![Purchases page while not signed in](docs/screenshots/purchases-not-signed-in.png)
 
 ## Downloads
 
@@ -108,6 +118,8 @@ Every command suddenly failing — sign-in included — is almost never an authe
 - **Linux** — nothing to strip; the executable bit is repaired if a manual unzip lost it.
 - If the bundled helper is a build for another platform, AppOogst falls back to a system `ipatool` (Homebrew, apt, Scoop) and says so in the log.
 - “2FA code is required” — enter the code Apple sent to your trusted device in the 2FA field and press Sign in again.
+- “purchases failed: … the keyring …” / “The specified item could not be found” — ipatool has no signed-in account yet: sign in on the **Account** page, then press **Refresh** on Purchases (it reloads by itself right after a successful sign-in).
+- Purchases can take 10–15 s (Apple's servers). The page label and the status bar report the outcome; a failure now names the reason instead of resetting to “ready”.
 
 ## Build from source
 
@@ -145,6 +157,7 @@ Works the same on every system — `dotnet run -- <flag>` from source, or the pa
 --selftest   # argument building, JSON parsers, prefill, bundled-binary lookup + it actually running
 --probe      # real CLI round-trip: auth info, search, list-purchases
 --diagnose   # which ipatool is used, its version, whether it can execute, auth state
+--shot /tmp/purchases.png --page purchases   # render any page to a PNG and exit
 ```
 
 ## How it works

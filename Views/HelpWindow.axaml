@@ -35,6 +35,7 @@
         <StackPanel Spacing="6">
           <TextBlock Classes="h2" Text="3 · Purchases — apps tied to your Apple ID" />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• The list loads automatically the first time you open the page: 50 apps per page with a total counter (page 1 — 50 of 2704 apps)." />
+          <TextBlock Classes="muted" TextWrapping="Wrap" Text="• If the list does not load, the page label and the status bar name the reason (usually: not signed in yet). Sign in on Account, then press Refresh — a failed load is never cached, so the page retries by itself when you come back." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Click a row: App ID, Bundle ID and platform are filled into the Download form automatically (select-to-fill)." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Double-click a row to jump straight to Download. Use Next page to browse further." />
           <TextBlock Classes="muted" TextWrapping="Wrap" Text="• Listing can take 10–15 seconds (Apple's servers) — watch the status bar." />
